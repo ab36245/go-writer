@@ -47,7 +47,7 @@ func TestStructValue(t *testing.T) {
 
 func trim(s string) string {
 	t := ""
-	for _, l := range strings.Split(s, "\n") {
+	for l := range strings.SplitSeq(s, "\n") {
 		m := strings.TrimSpace(l)
 		if n, found := strings.CutPrefix(m, "|"); found {
 			if t != "" {
