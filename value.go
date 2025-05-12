@@ -28,7 +28,7 @@ func doValue(w *valueWriter, v reflect.Value) {
 		n := v.Len()
 		if n > 0 {
 			w.End("")
-			w.Over()
+			w.Over("")
 			i := v.MapRange()
 			for i.Next() {
 				doValue(w, i.Key())
@@ -36,7 +36,7 @@ func doValue(w *valueWriter, v reflect.Value) {
 				doValue(w, i.Value())
 				w.End(",")
 			}
-			w.Back()
+			w.Back("")
 		}
 		w.Add("}")
 	case reflect.Pointer:
@@ -57,12 +57,12 @@ func doValue(w *valueWriter, v reflect.Value) {
 		n := v.Len()
 		if n > 0 {
 			w.End("")
-			w.Over()
+			w.Over("")
 			for i := 0; i < n; i++ {
 				doValue(w, v.Index(i))
 				w.End(",")
 			}
-			w.Back()
+			w.Back("")
 		}
 		w.Add("]")
 	case reflect.String:
@@ -72,13 +72,13 @@ func doValue(w *valueWriter, v reflect.Value) {
 		n := v.NumField()
 		if n > 0 {
 			w.End("")
-			w.Over()
+			w.Over("")
 			for i := 0; i < n; i++ {
 				w.Add("%s: ", t.Field(i).Name)
 				doValue(w, v.Field(i))
 				w.End(",")
 			}
-			w.Back()
+			w.Back("")
 		}
 		w.Add("}")
 	default:

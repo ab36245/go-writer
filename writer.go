@@ -46,10 +46,13 @@ func (w *Writer) Add(mesg string, args ...any) {
 	}
 }
 
-func (w *Writer) Back() {
+func (w *Writer) Back(mesg string, args ...any) {
 	w.indent--
 	if w.indent < 0 {
 		w.indent = 0
+	}
+	if mesg != "" {
+		w.Add(mesg, args...)
 	}
 }
 
@@ -69,7 +72,10 @@ func (w *Writer) Len() int {
 	return w.buffer.Len()
 }
 
-func (w *Writer) Over() {
+func (w *Writer) Over(mesg string, args ...any) {
+	if mesg != "" {
+		w.Add(mesg, args...)
+	}
 	w.indent++
 }
 
