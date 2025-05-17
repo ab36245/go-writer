@@ -73,9 +73,7 @@ func (w *Writer) Len() int {
 }
 
 func (w *Writer) Over(mesg string, args ...any) {
-	if mesg != "" {
-		w.Add(mesg, args...)
-	}
+	w.End(mesg, args...)
 	w.indent++
 }
 
