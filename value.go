@@ -27,14 +27,15 @@ func doValue(w *valueWriter, v reflect.Value) {
 		w.Add("{")
 		n := v.Len()
 		if n > 0 {
-			w.End("")
 			w.Over("")
-			i := v.MapRange()
-			for i.Next() {
-				doValue(w, i.Key())
-				w.End(": ")
-				doValue(w, i.Value())
-				w.End(",")
+			{
+				i := v.MapRange()
+				for i.Next() {
+					doValue(w, i.Key())
+					w.End(": ")
+					doValue(w, i.Value())
+					w.End(",")
+				}
 			}
 			w.Back("")
 		}
@@ -56,11 +57,12 @@ func doValue(w *valueWriter, v reflect.Value) {
 		w.Add("[")
 		n := v.Len()
 		if n > 0 {
-			w.End("")
 			w.Over("")
-			for i := 0; i < n; i++ {
-				doValue(w, v.Index(i))
-				w.End(",")
+			{
+				for i := 0; i < n; i++ {
+					doValue(w, v.Index(i))
+					w.End(",")
+				}
 			}
 			w.Back("")
 		}
@@ -68,15 +70,17 @@ func doValue(w *valueWriter, v reflect.Value) {
 	case reflect.String:
 		w.Add("%q", v)
 	case reflect.Struct:
-		w.Add("%s {", v.Type().Name())
+		// w.Add("%s {", v.Type().Name())
+		w.Add("%s {", v.Type())
 		n := v.NumField()
 		if n > 0 {
-			w.End("")
 			w.Over("")
-			for i := 0; i < n; i++ {
-				w.Add("%s: ", t.Field(i).Name)
-				doValue(w, v.Field(i))
-				w.End(",")
+			{
+				for i := 0; i < n; i++ {
+					w.Add("%s: ", t.Field(i).Name)
+					doValue(w, v.Field(i))
+					w.End(",")
+				}
 			}
 			w.Back("")
 		}
