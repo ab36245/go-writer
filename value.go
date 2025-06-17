@@ -2,90 +2,82 @@ package writer
 
 import (
 	"reflect"
+	"time"
 )
 
+func Value() *valueWriter {
+	return &valueWriter{
+		*New(),
+	}
+}
+
 type valueWriter struct {
-	*Writer
-	seen map[uintptr]bool
+	Writer
 }
 
-func Value(value any) string {
-	w := &valueWriter{
-		Writer: New(),
-		seen:   make(map[uintptr]bool),
-	}
-	doValue(w, reflect.ValueOf(value))
-	return w.String()
+func (w *valueWriter) Val(value any) *valueWriter {
+	w.doVal(value)
+	return w
 }
 
-func doValue(w *valueWriter, v reflect.Value) {
-	t := v.Type()
-	switch t.Kind() {
-	case reflect.Interface:
-		doValue(w, v.Elem())
-	case reflect.Map:
-		w.Add("{")
-		n := v.Len()
-		if n > 0 {
-			w.Over("")
-			{
-				i := v.MapRange()
-				for i.Next() {
-					doValue(w, i.Key())
-					w.End(": ")
-					doValue(w, i.Value())
-					w.End(",")
-				}
-			}
-			w.Back("")
-		}
-		w.Add("}")
-	case reflect.Pointer:
-		// Not sure if this is right!
-		if v.IsNil() {
-			w.Add("nil")
-		} else {
-			ptr := v.Pointer()
-			w.Add("*(0x%08x)", ptr)
-			if _, ok := w.seen[ptr]; !ok {
-				w.seen[ptr] = true
-				w.Add(" ")
-				doValue(w, v.Elem())
-			}
-		}
-	case reflect.Slice:
-		w.Add("[")
-		n := v.Len()
-		if n > 0 {
-			w.Over("")
-			{
-				for i := 0; i < n; i++ {
-					doValue(w, v.Index(i))
-					w.End(",")
-				}
-			}
-			w.Back("")
-		}
-		w.Add("]")
-	case reflect.String:
-		w.Add("%q", v)
-	case reflect.Struct:
-		// w.Add("%s {", v.Type().Name())
-		w.Add("%s {", v.Type())
-		n := v.NumField()
-		if n > 0 {
-			w.Over("")
-			{
-				for i := 0; i < n; i++ {
-					w.Add("%s: ", t.Field(i).Name)
-					doValue(w, v.Field(i))
-					w.End(",")
-				}
-			}
-			w.Back("")
-		}
-		w.Add("}")
-	default:
+func (w *valueWriter) doVal(v any) {
+	switch v := v.(type) {
+	case bool:
 		w.Add("%v", v)
+	case int:
+		w.Add("%v", v)
+	case nil:
+		w.Add("nil")
+	case string:
+		w.Add("%q", v)
+	case time.Time:
+		w.Add("%q", v.Format(time.RFC3339))
+	default:
+		r := reflect.ValueOf(v)
+		t := r.Type()
+		switch t.Kind() {
+		case reflect.Map:
+			w.doMap(r)
+		case reflect.Slice:
+			w.doSlice(r)
+		default:
+			w.Add("??? %v", v)
+		}
 	}
+}
+
+func (w *valueWriter) doMap(r reflect.Value) {
+	w.Add("{")
+	n := r.Len()
+	if n > 0 {
+		w.Over("")
+		{
+			i := r.MapRange()
+			for i.Next() {
+				w.doVal(i.Key().Interface())
+				w.Add(": ")
+				w.doVal(i.Value().Interface())
+				w.End(",")
+			}
+		}
+		w.Back("")
+	}
+	w.Add("}")
+
+}
+
+func (w *valueWriter) doSlice(r reflect.Value) {
+	w.Add("[")
+	n := r.Len()
+	if n > 0 {
+		w.Over("")
+		{
+			for i := range n {
+				w.doVal(r.Index(i).Interface())
+				w.End(",")
+			}
+		}
+		w.Back("")
+	}
+	w.Add("]")
 }

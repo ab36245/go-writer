@@ -1,60 +1,47 @@
 package writer
 
 import (
-	"strings"
 	"testing"
+	"time"
 )
 
-func TestSliceValue(t *testing.T) {
-	v := []int{2, 3}
-	a := Value(v)
-	e := "[\n  2,\n  3,\n]"
-	if a != e {
-		t.Fatalf("expected %s, actual %s", e, a)
-	}
+func TestValueInt(t *testing.T) {
+	try(t, 42, "42")
 }
 
-func TestStringValue(t *testing.T) {
-	v := "malaka"
-	a := Value(v)
-	e := `"malaka"`
-	if a != e {
-		t.Fatalf("expected %s, actual %s", e, a)
+func TestValueMap(t *testing.T) {
+	m := map[int]string{
+		1: "one",
+		2: "two",
 	}
+	try(t, m, "nil")
 }
 
-type simpleStruct struct {
-	open bool
-	name string
+func TestValueNil(t *testing.T) {
+	try(t, nil, "nil")
 }
 
-func TestStructValue(t *testing.T) {
-	v := simpleStruct{
-		open: false,
-		name: "malaka",
+func TestValueSlice(t *testing.T) {
+	m := []time.Time{
+		time.Now(),
+		time.Now(),
 	}
-	a := Value(v)
-	e := trim(`
-		|simpleStruct {
-		|  open: false,
-		|  name: "malaka",
-		|}
-	`)
-	if a != e {
-		t.Fatalf("expected %s, actual %s", e, a)
-	}
+	try(t, m, "nil")
 }
 
-func trim(s string) string {
-	t := ""
-	for l := range strings.SplitSeq(s, "\n") {
-		m := strings.TrimSpace(l)
-		if n, found := strings.CutPrefix(m, "|"); found {
-			if t != "" {
-				t += "\n"
-			}
-			t += n
-		}
+func TestValueString(t *testing.T) {
+	try(t, "malaka was here", "42")
+}
+
+func TestValueTime(t *testing.T) {
+	try(t, time.Now(), "malaka")
+}
+
+func try(t *testing.T, v any, e string) {
+	w := Value()
+	w.Val(v)
+	s := w.String()
+	if s != e {
+		t.Fatalf("expected %s, actual %s", e, s)
 	}
-	return t
 }
