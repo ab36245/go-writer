@@ -3,15 +3,10 @@ package writer
 import "strings"
 
 type simpleStruct struct {
-	open bool
-	name string
-}
-
-func (s simpleStruct) String() string {
-	return Object("simpleStruct").
-		Field("open", s.open).
-		Field("name", s.name).
-		String()
+	Open     bool
+	LongName string
+	hide     float64
+	malaka   bool
 }
 
 func trim(s string) string {
