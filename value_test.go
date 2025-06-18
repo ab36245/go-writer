@@ -6,6 +6,16 @@ import (
 	"time"
 )
 
+func TestBytesValue(t *testing.T) {
+	v := []byte("I saw a fish going swimming by")
+	e := trim(`
+	    |30 bytes
+        |    0000 49 20 73 61 77 20 61 20 66 69 73 68 20 67 6f 69
+        |    0016 6e 67 20 73 77 69 6d 6d 69 6e 67 20 62 79
+	`)
+	valueTest(t, v, e)
+}
+
 func TestValueInt(t *testing.T) {
 	v := 42
 	e := "42"
@@ -52,7 +62,9 @@ func TestValueString(t *testing.T) {
 func TestValueStruct(t *testing.T) {
 	v := simpleStruct{
 		LongName: "malaka",
+		hide:     3.14,
 		Open:     false,
+		malaka:   true,
 	}
 	e := trim(`
 		|simpleStruct{
