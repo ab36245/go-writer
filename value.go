@@ -8,11 +8,11 @@ import (
 
 func Value(value any) string {
 	w := WithPrefix("    ")
-	doVal(w, value)
+	valueWrite(w, value)
 	return w.String()
 }
 
-func doVal(w *Writer, v any) {
+func valueWrite(w *Writer, v any) {
 	switch v := v.(type) {
 	case nil:
 		w.Add("nil")
@@ -26,22 +26,40 @@ func doVal(w *Writer, v any) {
 		w.Add("%q", v)
 	case time.Time:
 		w.Add("%s", v.Format(time.RFC3339))
+	case []byte:
+		valueBytes(w, v)
 	default:
 		r := reflect.ValueOf(v)
 		switch r.Type().Kind() {
 		case reflect.Map:
-			doMap(w, r)
+			valueMap(w, r)
 		case reflect.Slice:
-			doSlice(w, r)
+			valueSlice(w, r)
 		case reflect.Struct:
-			doStruct(w, r)
+			valueStruct(w, r)
 		default:
 			w.Add("??? %v", v)
 		}
 	}
 }
 
-func doMap(w *Writer, r reflect.Value) {
+func valueBytes(w *Writer, v []byte) {
+	w.Over("%d bytes", len(v))
+	{
+		for i, b := range v {
+			if i%16 == 0 {
+				if i > 0 {
+					w.End("")
+				}
+				w.Add("%04d", i)
+			}
+			w.Add(" %02x", b)
+		}
+	}
+	w.Back("")
+}
+
+func valueMap(w *Writer, r reflect.Value) {
 	w.Add("{")
 	n := r.Len()
 	if n > 0 {
@@ -49,9 +67,9 @@ func doMap(w *Writer, r reflect.Value) {
 		{
 			i := r.MapRange()
 			for i.Next() {
-				doVal(w, i.Key().Interface())
+				valueWrite(w, i.Key().Interface())
 				w.Add(": ")
-				doVal(w, i.Value().Interface())
+				valueWrite(w, i.Value().Interface())
 				w.End(",")
 			}
 		}
@@ -61,14 +79,14 @@ func doMap(w *Writer, r reflect.Value) {
 
 }
 
-func doSlice(w *Writer, r reflect.Value) {
+func valueSlice(w *Writer, r reflect.Value) {
 	w.Add("[")
 	n := r.Len()
 	if n > 0 {
 		w.Over("")
 		{
 			for i := range n {
-				doVal(w, r.Index(i).Interface())
+				valueWrite(w, r.Index(i).Interface())
 				w.End(",")
 			}
 		}
@@ -77,7 +95,7 @@ func doSlice(w *Writer, r reflect.Value) {
 	w.Add("]")
 }
 
-func doStruct(w *Writer, v reflect.Value) {
+func valueStruct(w *Writer, v reflect.Value) {
 	vt := v.Type()
 	w.Add("%s{", vt.Name())
 
@@ -105,7 +123,7 @@ func doStruct(w *Writer, v reflect.Value) {
 				ft := vt.Field(i)
 				name := fmt.Sprintf("%s:", ft.Name)
 				w.Add("%-*s ", max+1, name)
-				doVal(w, f.Interface())
+				valueWrite(w, f.Interface())
 				w.End(",")
 			}
 		}
