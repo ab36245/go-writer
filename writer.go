@@ -47,9 +47,8 @@ func (w *Writer) Add(mesg string, args ...any) {
 }
 
 func (w *Writer) Back(mesg string, args ...any) {
-	w.indent--
-	if w.indent < 0 {
-		w.indent = 0
+	if w.indent > 0 {
+		w.indent--
 	}
 	if mesg != "" {
 		w.Add(mesg, args...)
