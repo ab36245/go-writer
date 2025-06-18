@@ -4,6 +4,9 @@ import (
 	"reflect"
 )
 
+// This is a more complex version of the Value() using reflection exclusively
+// and trying to resolve all types.
+
 func Reflect(value any) string {
 	w := &reflectWriter{
 		Writer: New(),
