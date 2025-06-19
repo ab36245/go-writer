@@ -38,7 +38,8 @@ func valueWrite(w *Writer, v any) {
 		case reflect.Struct:
 			valueStruct(w, r)
 		default:
-			w.Add("??? %v", v)
+			// Just use the type's String method
+			w.Add("%v", v)
 		}
 	}
 }
