@@ -8,7 +8,7 @@ import (
 
 func TestBytesValue(t *testing.T) {
 	v := []byte("I saw a fish going swimming by")
-	e := trim(`
+	e := Trim(`
 	    |30 bytes
         |    0000 49 20 73 61 77 20 61 20 66 69 73 68 20 67 6f 69
         |    0016 6e 67 20 73 77 69 6d 6d 69 6e 67 20 62 79
@@ -28,7 +28,7 @@ func TestValueMap(t *testing.T) {
 		2:  "two",
 		99: "ninety-nine",
 	}
-	e := trim(`
+	e := Trim(`
 	    |{
         |    1: "one",
         |    2: "two",
@@ -44,7 +44,7 @@ func TestValueNil(t *testing.T) {
 
 func TestValueSlice(t *testing.T) {
 	v := []float64{3.14159, 2.71828}
-	e := trim(`)
+	e := Trim(`)
 	    |[
         |    3.14159,
         |    2.71828,
@@ -60,13 +60,19 @@ func TestValueString(t *testing.T) {
 }
 
 func TestValueStruct(t *testing.T) {
+	type simpleStruct struct {
+		Open     bool
+		LongName string
+		hide     float64
+		malaka   bool
+	}
 	v := simpleStruct{
 		LongName: "malaka",
 		hide:     3.14,
 		Open:     false,
 		malaka:   true,
 	}
-	e := trim(`
+	e := Trim(`
 		|simpleStruct{
 		|    Open:     false,
 		|    LongName: "malaka",
