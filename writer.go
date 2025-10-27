@@ -29,7 +29,7 @@ func (w *Writer) Add(mesg string, args ...any) {
 	}
 	prefix := strings.Repeat(w.prefix, w.indent)
 	lines := strings.Split(mesg, "\n")
-	for i := 0; i < len(lines); i++ {
+	for i := range lines {
 		line := lines[i]
 		if line != "" {
 			if w.start {
