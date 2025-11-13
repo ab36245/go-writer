@@ -24,11 +24,59 @@ type Writer struct {
 }
 
 func (w *Writer) Add(mesg string, args ...any) {
-	if len(args) > 0 {
-		mesg = fmt.Sprintf(mesg, args...)
+	w.put(w.fmt(mesg, args...))
+}
+
+func (w *Writer) Back(mesg string, args ...any) {
+	if w.indent > 0 {
+		w.indent--
 	}
+	w.put(w.fmt(mesg, args...))
+}
+
+func (w *Writer) Clear() {
+	w.buffer.Reset()
+}
+
+func (w *Writer) End(mesg string, args ...any) {
+	w.put(w.fmt(mesg, args...) + "\n")
+}
+
+func (w *Writer) IsEmpty() bool {
+	return w.Len() == 0
+}
+
+func (w *Writer) Len() int {
+	return w.buffer.Len()
+}
+
+func (w *Writer) Over(str string, args ...any) {
+	str = w.fmt(str, args...)
+	if !w.start || str != "" {
+		w.put(str + "\n")
+	}
+	w.indent++
+}
+
+func (w *Writer) Sep(chr rune) {
+	w.End("# %s", strings.Repeat(string(chr), 78))
+}
+
+func (w *Writer) String() string {
+	return w.buffer.String()
+}
+
+func (w Writer) fmt(str string, args ...any) string {
+	if len(args) == 0 {
+		return str
+	}
+	return fmt.Sprintf(str, args...)
+
+}
+
+func (w *Writer) put(str string) {
 	prefix := strings.Repeat(w.prefix, w.indent)
-	lines := strings.Split(mesg, "\n")
+	lines := strings.Split(str, "\n")
 	for i := range lines {
 		line := lines[i]
 		if line != "" {
@@ -44,42 +92,4 @@ func (w *Writer) Add(mesg string, args ...any) {
 			w.start = line == ""
 		}
 	}
-}
-
-func (w *Writer) Back(mesg string, args ...any) {
-	if w.indent > 0 {
-		w.indent--
-	}
-	if mesg != "" {
-		w.Add(mesg, args...)
-	}
-}
-
-func (w *Writer) Clear() {
-	w.buffer.Reset()
-}
-
-func (w *Writer) End(mesg string, args ...any) {
-	w.Add(mesg+"\n", args...)
-}
-
-func (w *Writer) IsEmpty() bool {
-	return w.Len() == 0
-}
-
-func (w *Writer) Len() int {
-	return w.buffer.Len()
-}
-
-func (w *Writer) Over(mesg string, args ...any) {
-	w.End(mesg, args...)
-	w.indent++
-}
-
-func (w *Writer) Sep(chr rune) {
-	w.End("# %s", strings.Repeat(string(chr), 78))
-}
-
-func (w *Writer) String() string {
-	return w.buffer.String()
 }
