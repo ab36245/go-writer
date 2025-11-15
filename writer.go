@@ -38,8 +38,8 @@ func (w *Writer) Clear() {
 	w.buffer.Reset()
 }
 
-func (w *Writer) End(mesg string, args ...any) {
-	w.put(w.fmt(mesg, args...) + "\n")
+func (w *Writer) End(str string, args ...any) {
+	w.put(w.fmt(str, args...) + "\n")
 }
 
 func (w *Writer) IsEmpty() bool {
@@ -71,7 +71,6 @@ func (w Writer) fmt(str string, args ...any) string {
 		return str
 	}
 	return fmt.Sprintf(str, args...)
-
 }
 
 func (w *Writer) put(str string) {
